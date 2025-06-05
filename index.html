@@ -1,0 +1,98 @@
+
+
+# python-stuff
+Unsorted Python Python Projects
+
+# Useful CLI tools
+cmatrix - background matrix like text tools
+cmatrix -bu 3
+
+bat - cat replacement with Git features
+fzf - fuzzy finder to list/search
+zoxide - cd replacement with pattern matching and popularity remebering
+eza (was exa) - ls replacement with icongraphy
+alias ls="eza --icons --group-directories-first"
+alias ls="eza --icons --group-directories-first -l"
+
+nmap - network mapper
+nmap IP - scan an IP
+nmap -sn 10.1.0.0-20 - scan a range
+nmap --script ssl-cert -p 443 IP/hostname - provide SSL cert information
+nmap --script ssl-enum-ciphers -p 443 IP/hostname - view SSL settings/cipohers
+
+# Linux Monitoring tools
+## Network monitoring
+netstat/lsof
+iftop - network traffic to/from src/dst
+iptraf - ip traffic monitoring src/dst
+nload - network load per interface
+nethogs - processes hogging network
+softflowd (Netflow exporter)
+## Systems/CPU
+nmon - monitoring variuos system aspects
+btop - good generalist
+htop - Top replacmenet
+atop - core metrics on system
+s-tui - CPu monitoring/stresser
+glances - quick view of system health/stats
+dstat - cpu, mem, io statistics
+## Memory
+free
+cat /proc/meminfo
+vmstat
+## Disk monitoring
+iostat -  (-xm for queue depth/%util and MB)
+iotop - disk IO monitoring by process
+sysdig/csysdig - to investigate disk access by process
+## Disk usage monitoring
+df -
+ncdu - interactive du with delete/drill down
+duf - Tabular df
+## Graphics cards
+nvtop - all vendor GPU monitoring
+nvidia-smi - nVidia GPU monitoring
+intel_gpu_top - Intel GPU monitoring
+radeontop - AMD GPU monitoring
+## MacOSX monitoring
+asitop - MacOSX top monitoring
+## All sorts of perf monitoring
+perf - perf monitoring tool of all metrics
+## Hardware monitoring
+lshw - list hardware components, use -C disk, network
+sensors - component temp
+ipmitool - monitoring (setting) of IPMI enabled devices
+## Wifi monitoring
+wavemon - link quality for wifi
+
+## Untested/filed
+ripgrep
+mosh - ssh like tunnel
+mtr
+fd - find
+fzf - fuzzy finder
+ranger - curdses file manager
+zoxide - cd replacement
+exa = ls tree view/colour coding
+stat - file statistics
+progess - view progressof app transfers
+dog - dig replacement
+termshark - terminal wireshark
+ipcalc - IP subnetting
+wormhole - P2P/relay file transfer with keys
+systemd-analyze - blame, critical-path
+procs - ps aux replacment
+lazydocker - terminal tool for docker
+rsync - file transfers
+shread - overwrites file
+ts - timestamp
+errno
+ifdata
+vidir
+vipe - vi in pipes
+unp - unpack any archive
+jq - JSON filter
+taskwarrior
+asciinema - record/play cmd line interactions
+agg - comvert above into a GIF vid
+fabric
+ai - 
