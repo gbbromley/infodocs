@@ -1,0 +1,43 @@
+Force Arista rebuild
+
+Delete the following files:
+enable
+delete flash:startup-config
+delete flash:zerotouch-config
+reload now
+
+
+
+ZTP
+- Setup DHCP option 67
+config system dhcp server
+    edit 3
+        set dns-service default
+        set default-gateway 192.168.1.1
+        set netmask 255.255.255.0
+        set interface "lan"
+        config ip-range
+            edit 1
+                set start-ip 192.168.1.100
+                set end-ip 192.168.1.199
+            next
+        end
+        config options
+            edit 1
+                set code 67
+                set type string
+                set value "tftp://192.168.1.49/ztp-bootstrap"
+            next
+        end
+        config reserved-address
+            edit 1
+                set ip 192.168.1.220
+                set mac 98:5d:82:86:c3:9f
+            next
+            edit 2
+                set ip 192.168.1.221
+                set mac 28:99:3a:66:f4:5b
+            next
+        end
+    next
+end

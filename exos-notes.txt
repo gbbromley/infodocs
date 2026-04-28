@@ -1,0 +1,42 @@
+EXOS MLAG
+
+create vlan DATA
+configure vlan DATA tag 10
+create vlan ISC
+configure VLAN ISC tag 4094
+configure vlan ISC ipaddress 192.0.2.1 255.255.255.252
+
+
+configure vlan DATA add ports 1,48 tagged
+configure vlan ISC add ports 48 tagged
+
+enable sharing 1 grouping 1 algorithm address-based L3_L4 lacp
+#enable sharing 48 grouping 47-48 algorithm address-based L3_L4 lacp
+
+
+create mlag peer EXOS2
+configure mlag peer EXOS2 ipaddress 192.0.2.2
+configure mlag peer EXOS2 lacp-mac 00:04:96:98:82:a8
+enable mlag port 1 peer EXOS2 id 1
+
+
+
+create vlan DATA
+configure vlan DATA tag 10
+create vlan ISC
+configure VLAN ISC tag 4094
+configure vlan ISC ipaddress 192.0.2.2 255.255.255.252
+
+configure vlan DATA add ports 1,48 tagged
+configure vlan ISC add ports 48 tagged
+
+enable sharing 1 grouping 1 algorithm address-based L3_L4 lacp
+#enable sharing 48 grouping 47-48 algorithm address-based L3_L4 lacp
+
+
+create mlag peer EXOS1
+configure mlag peer EXOS1 ipaddress 192.0.2.1
+configure mlag peer EXOS1 lacp-mac 00:04:96:98:82:a8
+enable mlag port 1 peer EXOS1 id 1
+
+

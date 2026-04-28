@@ -1,0 +1,190 @@
+OpenGear ACM certificate renewal
+
+If the above steps somehow broke the GUI, we can re-instate the default self-signed certificate so you can start again.
+
+Run the following command to check the firmware version.
+
+cat /etc/version
+If the firmware is 4.3.1 or lower, login as admin or root user on the CLI and run commands below to restore default certificates.
+
+sudo -i
+
+cp /etc/default/*pem /etc/config
+config -a
+At this stage cherokee should be restarted. or reboot.
+
+
+If the firmware is 4.4.0 or higher, login as admin or root user on the CLI and run commands below to create default certificates.
+You can customize the CN and other info by editing /etc/config/openssl.cnf file first.
+
+sudo -i
+rm /etc/config/ssl*
+/etc/scripts/gen-keys
+The web service should be running at this stage. If not try a reboot.
+
+
+Could do:
+- Replace openssl.cnf with template version filling in key values, however this is not used in any scripted cert/key setup
+[ req ]
+default_bits            = 2048
+default_keyfile         = privkey.pem
+distinguished_name      = req_distinguished_name
+attributes              = req_attributes
+
+[ req_distinguished_name ]
+countryName                     = {{ ssl['country'] }}
+countryName_min                 = 2
+countryName_max                 = 2
+stateOrProvinceName             = {{ ssl['county'] }}
+localityName                    = {{ ssl['town'] }}
+0.organizationName              = {{ ssl['company'] }}
+organizationalUnitName          = {{ ssl['dept'] }}
+commonName                      = {{ ssl['requestor'] }}
+commonName_max                  = 64
+emailAddress                    = {{ ssl['email'] }}
+emailAddress_max                = 64
+
+[ req_attributes ]
+challengePassword               = 
+challengePassword_min           = 4
+challengePassword_max           = 20
+unstructuredName                = {{ ssl['company'] }}
+
+[openssl_init]
+ssl_conf = ssl_configuration    # Section must be registered here
+
+# New section to force TLS certs
+[ssl_configuration]
+system_default = tls_system_default
+
+[tls_system_default]
+MinProtocol = TLSv1.2
+# Only use if you need SSL3, TLS1, 1.1 and DTLS1
+#CipherString = DEFAULT@SECLEVEL=0
+
+- Edit openssl-options.conf to include some changes e.g. above
+[req]
+distinguished_name = subject
+prompt = no
+default_bits = 2048
+default_md = sha256
+x509_extensions = extensions
+distinguished_name      = req_distinguished_name
+attributes              = req_attributes
+
+# Leave this as 192.168.0.1 if you want self signed certs and device renewals via gen-keys
+[subject]
+CN=192.168.1.200
+
+[extensions]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation,digitalSignature,keyEncipherment
+subjectAltName = IP:192.168.1.200,DNS:192.168.1.200
+# OG-8798: Include 'serverAuth' to satisfy OSX Big Sur browsers
+# Include "2.5.29.37.0" (anyExtendedKeyUsage) to satisfy other
+# applications. Refer to RFC-5280 section 4.2.1.12
+extendedKeyUsage = "serverAuth,2.5.29.37.0"
+
+#
+# You can setup cert details if you want as per below
+#
+# Older OpenSSL in use doesnt understand min/max and default
+[ req_distinguished_name ]
+countryName                     = GB
+#countryName_min                 = 2
+#countryName_max                 = 2
+stateOrProvinceName             = Gloucestershire
+localityName                    = Gloucester
+0.organizationName              = Int* Consulting Ltd
+#0.organizationName_default      = Int* Consulting Ltd
+organizationalUnitName          = NOC
+#0.organizationalUnitName        = Organizational Unit Name 1 (eg, section)
+#0.organizationalUnitName_default = DoD
+#1.organizationalUnitName        = Organizational Unit Name 2 (eg, section)
+#1.organizationalUnitName_default = PKI
+#2.organizationalUnitName        = Organizational Unit Name 3 (eg, section)
+#2.organizationalUnitName_default = CONTRACTOR
+commonName                      = 192.168.1.200
+#commonName_max                  = 64
+emailAddress                    = noc@intstar.com
+#emailAddress_max                = 64
+
+[ req_attributes ]
+#challengePassword               =
+#challengePassword_min           = 4
+#challengePassword_max           = 20
+unstructuredName                = Int* Consulting Ltd
+
+[openssl_init]
+ssl_conf = ssl_configuration    # Section must be registered here
+
+# New section to force TLS certs
+[ssl_configuration]
+system_default = tls_system_default
+
+[tls_system_default]
+MinProtocol = TLSv1.2
+# Only use if you need SSL3, TLS1, 1.1 and DTLS1
+#CipherString = DEFAULT@SECLEVEL=0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[ req ]
+default_bits            = 1024
+default_keyfile         = privkey.pem
+distinguished_name      = req_distinguished_name
+attributes              = req_attributes
+
+[ req_distinguished_name ]
+countryName                     = UK
+countryName_min                 = 2
+countryName_max                 = 2
+stateOrProvinceName             = Gloucestershire
+localityName                    = Gloucester
+0.organizationName              = Int* Consulting Ltd
+0.organizationName_default      = Int* Consulting Ltd
+organizationalUnitName          = NOC
+#0.organizationalUnitName        = Organizational Unit Name 1 (eg, section)
+#0.organizationalUnitName_default = DoD
+#1.organizationalUnitName        = Organizational Unit Name 2 (eg, section)
+#1.organizationalUnitName_default = PKI
+#2.organizationalUnitName        = Organizational Unit Name 3 (eg, section)
+#2.organizationalUnitName_default = CONTRACTOR
+commonName                      = Int* NOC
+commonName_max                  = 64
+emailAddress                    = noc@intstar.com
+emailAddress_max                = 64
+
+[ req_attributes ]
+challengePassword               =
+challengePassword_min           = 4
+challengePassword_max           = 20
+unstructuredName                = Int* Consulting Ltd
+
+[openssl_init]
+ssl_conf = ssl_configuration    # Section must be registered here
+
+# New section to force TLS certs
+[ssl_configuration]
+system_default = tls_system_default
+
+[tls_system_default]
+MinProtocol = TLSv1.2
+# Only use if you need SSL3, TLS1, 1.1 and DTLS1
+#CipherString = DEFAULT@SECLEVEL=0

@@ -1,0 +1,468 @@
+iBGP Propogation Lab
+
+###
+# Mikrotik - both
+/ip/route
+add dst-address=0.0.0.0/8 blackhole
+add dst-address=10.0.0.0/8 blackhole
+add dst-address=100.64.0.0/10 blackhole
+add dst-address=127.0.0.0/8 blackhole
+add dst-address=169.254.0.0/16 blackhole
+add dst-address=172.16.0.0/12 blackhole
+add dst-address=192.0.0.0/24 blackhole
+add dst-address=192.0.2.0/24 blackhole
+add dst-address=192.168.0.0/16 blackhole
+add dst-address=198.18.0.0/15 blackhole
+add dst-address=198.51.100.0/24 blackhole
+add dst-address=203.0.113.0/24 blackhole
+
+/ip/firewall/address-list/
+add list=BOGONS address=0.0.0.0/8
+add list=BOGONS address=10.0.0.0/8
+add list=BOGONS address=100.64.0.0/10
+add list=BOGONS address=127.0.0.0/8
+add list=BOGONS address=169.254.0.0/16
+add list=BOGONS address=172.16.0.0/12
+add list=BOGONS address=192.0.0.0/24
+add list=BOGONS address=192.0.2.0/24
+add list=BOGONS address=192.168.0.0/16
+add list=BOGONS address=198.18.0.0/15
+add list=BOGONS address=198.51.100.0/24
+add list=BOGONS address=203.0.113.0/24
+add list=DEFAULTONLY address=0.0.0.0/0
+add list=EOS1 address=0.0.0.0/0
+add list=EOS1 address=10.0.0.0/8
+add list=EOS1 address=100.64.0.0/10
+add list=EOS2 address=0.0.0.0/0
+add list=EOS2 address=192.0.0.0/24
+add list=EOS2 address=192.0.2.0/24
+add list=EOS2 address=192.168.0.0/16
+
+###
+# Mikrotik isp1
+/ip address
+add address=62.216.228.69/30 comment=defconf interface=ether1 network=62.216.228.68
+add address=62.216.228.65/30 comment=defconf interface=ether2 network=62.216.228.64
+
+/routing/bgp/connection
+add name EOS1 as=15830 local.role=ebgp local.address=62.216.228.69 remote.address=62.216.228.70 remote.as=65011 output.default-originate=always output.network=EOS1
+add name EOS2 as=15830 local.role=ebgp local.address=62.216.228.65 remote.address=62.216.228.66 remote.as=65011 output.default-originate=always output.network=EOS2
+### use-bfd=yes does not work mikrotik to Arista, arista sees but Mikrotik fails to work and drops BGP
+
+###
+# Mikrotik isp2
+/ip address
+add address=28.56.228.69/30 comment=defconf interface=ether1 network=28.56.228.68
+add address=28.56.228.65/30 comment=defconf interface=ether2 network=28.56.228.64
+
+/routing/bgp/connection
+add name EOS1 as=2856 local.role=ebgp local.address=28.56.228.69 remote.address=28.56.228.70 remote.as=65001 output.default-originate=always output.network=EOS1
+add name EOS2 as=2856 local.role=ebgp local.address=28.56.228.65 remote.address=28.56.228.66 remote.as=65001 output.default-originate=always output.network=EOS2
+### use-bfd=yes does not work mikrotik to Arista, arista sees but Mikrotik fails to work and drops BGP
+
+###
+# eos1
+
+
+###
+# eos2
+
+
+###
+# ASA
+failover
+failover lan unit primary
+failover lan interface FAILOVER gi0/5
+failover link STATELINK gi0/6
+failover interface ip FAILOVER 192.0.2.1 255.255.255.252 standby 192.0.2.2
+failover interface ip STATELINK 192.0.2.5 255.255.255.252 standby 192.0.2.6 
+int gi0/5
+no shut
+int gi0/6
+no shut
+int gi0/0
+nameif OUTSIDE
+no shut
+ip address 61.216.0.77 255.255.255.240 standby 61.216.0.78
+int gi0/1
+nameif INSIDE
+no shut
+ip address 10.216.0.1 255.255.255.0 standby 10.216.0.2
+int gi0/2
+nameif OUTBACK
+no shut
+ip address 61.216.0.141 255.255.255.240 standby 61.216.0.142
+
+router bgp 65181
+ address-family ipv4
+  neighbor 61.216.0.65 remote-as 65181
+  neighbor 61.216.0.129 remote-as 65181
+  neighbor 61.216.0.65 fall-over bfd
+  neighbor 61.216.0.129 fall-over bfd
+  neighbor 61.216.0.65 activate
+  neighbor 61.216.0.129 activate
+
+###
+# ASA Backup
+failover
+failover lan unit secondary
+failover lan interface FAILOVER gi0/5
+failover link STATELINK gi0/6
+failover interface ip FAILOVER 192.0.2.1 255.255.255.252 standby 192.0.2.2
+failover interface ip STATELINK 192.0.2.5 255.255.255.252 standby 192.0.2.6 
+int gi0/5
+no shut
+int gi0/6
+no shut
+
+
+
+Mikrotik MLAG
+
+###
+# Config
+
+/ip dns set servers=8.8.8.8,8.8.4.4
+/ip route add dst-address=0.0.0.0/0 gateway=192.168.1.1
+
+
+/interface set sfp-sfpplus1 l2mtu=9216 mtu=9216
+/interface set sfp-sfpplus2 l2mtu=9216 mtu=9216
+/interface set sfp-sfpplus3 l2mtu=9216 mtu=9216
+/interface set sfp-sfpplus4 l2mtu=9216 mtu=9216
+/interface set sfp-sfpplus5 l2mtu=9216 mtu=9216
+/interface set sfp-sfpplus6 l2mtu=9216 mtu=9216
+/interface set sfp-sfpplus7 l2mtu=9216 mtu=9216
+/interface set sfp-sfpplus8 l2mtu=9216 mtu=9216
+
+/interface bonding set numbers=0 mtu=9216
+/interface bonding set numbers=1 mtu=9216
+/interface bonding set numbers=2 mtu=9216
+/interface bonding set numbers=3 mtu=9216
+/interface bonding set numbers=4 mtu=9216
+/interface bonding set numbers=5 mtu=9216
+
+/interface bonding
+add mode=802.3ad name=mlag lacp-rate=1sec slaves=sfp-sfpplus7,sfp-sfpplus8
+
+/interface bonding
+add mlag-id=1 mode=802.3ad name=client-bond1 slaves=sfp-sfpplus1 lacp-rate=1sec mtu=9216
+add mlag-id=2 mode=802.3ad name=client-bond2 slaves=sfp-sfpplus2 lacp-rate=1sec mtu=9216
+add mlag-id=3 mode=802.3ad name=client-bond3 slaves=sfp-sfpplus3 lacp-rate=1sec mtu=9216
+add mlag-id=4 mode=802.3ad name=client-bond4 slaves=sfp-sfpplus4 lacp-rate=1sec mtu=9216
+add mlag-id=5 mode=802.3ad name=client-bond5 slaves=sfp-sfpplus5 lacp-rate=1sec mtu=9216
+add mlag-id=6 mode=802.3ad name=client-bond6 slaves=sfp-sfpplus6 lacp-rate=1sec mtu=9216
+
+
+/interface bridge
+add name=bridge vlan-filtering=yes
+/interface bridge port
+#add bridge=bridge interface=ether1
+#add bridge=bridge interface=sfp-sfpplus7 pvid=4094
+#add bridge=bridge interface=sfp-sfpplus8 pvid=4094
+add bridge=bridge interface=mlag pvid=4094
+add bridge=bridge interface=client-bond1
+add bridge=bridge interface=client-bond2
+add bridge=bridge interface=client-bond3
+add bridge=bridge interface=client-bond4
+add bridge=bridge interface=client-bond5
+add bridge=bridge interface=client-bond6
+
+
+/interface bridge vlan
+add bridge=bridge1 tagged=qsfpplus1-1 vlan-ids=1 # works
+add bridge=bridge1 tagged=mlag vlan-ids=1 ## does not work
+
+###
+# msw0
+/system identity set name=msw0
+/ip address add address=192.168.1.3/24 network=192.168.1.0 interface=ether1
+/interface bridge mlag
+set bridge=bridge peer-port=mlag priority=64
+
+###
+# msw1
+/system identity set name=msw1
+/ip address add address=192.168.1.4/24 network=192.168.1.0 interface=ether1
+/interface bridge mlag
+set bridge=bridge peer-port=mlag
+
+
+
+
+
+ONT-MinION Lab
+
+###
+# ASA
+
+failover
+failover lan unit primary
+failover lan interface FAILOVER gi0/5
+failover link STATELINK gi0/6
+failover interface ip FAILOVER 192.0.2.1 255.255.255.252 standby 192.0.2.2
+failover interface ip STATELINK 192.0.2.5 255.255.255.252 standby 192.0.2.6 
+int gi0/5
+no shut
+int gi0/6
+no shut
+int gi0/0
+nameif OUTSIDE
+no shut
+ip address 61.216.0.77 255.255.255.240 standby 61.216.0.78
+int gi0/1
+nameif INSIDE
+no shut
+ip address 10.216.0.1 255.255.255.0 standby 10.216.0.2
+int gi0/2
+nameif OUTBACK
+no shut
+ip address 61.216.0.141 255.255.255.240 standby 61.216.0.142
+
+router bgp 65181
+ address-family ipv4
+  neighbor 61.216.0.65 remote-as 65181
+  neighbor 61.216.0.129 remote-as 65181
+  neighbor 61.216.0.65 activate
+  neighbor 61.216.0.129 activate
+
+
+###
+# Mikrotik BTnet1
+/ip address
+add address=61.216.0.1/30 comment=defconf interface=ether1 network=61.216.0.0
+add address=61.216.0.9/30 comment=defconf interface=ether2 network=61.216.0.8
+
+/routing bgp network
+add network=10.0.0.0/8 synchronize=yes
+add network=100.64.0.0/10 synchronize=yes
+
+/routing bgp instance
+set 0 as=2856
+/routing bgp peer
+add name BTNET update-source=61.216.0.9 remote-address=61.216.0.10 remote-as=2856
+add name INETCUST update-source=61.216.0.1 remote-address=61.216.0.2 remote-as=65181 default-originate=always
+set 1 out-filter=SW01
+
+###
+# Mikrotik BTnet2
+/ip address
+add address=61.216.0.5/30 comment=defconf interface=ether1 network=61.216.0.4
+add address=61.216.0.10/30 comment=defconf interface=ether2 network=61.216.0.8
+
+/routing bgp network
+add network=192.0.0.0/24 synchronize=yes
+add network=192.0.2.0/24 synchronize=yes
+add network=192.168.0.0/16 synchronize=yes
+
+/routing bgp instance
+set 0 as=2856
+/routing bgp peer
+add name BTNET update-source=61.216.0.10 remote-address=61.216.0.9 remote-as=2856
+add name INETCUST update-source=61.216.0.5 remote-address=61.216.0.6 remote-as=65181 default-originate=always
+set 1 out-filter=SW02
+
+###
+# Both
+
+/ip route
+add dst-address=0.0.0.0/8 type=blackhole
+add dst-address=10.0.0.0/8 type=blackhole
+add dst-address=100.64.0.0/10 type=blackhole
+add dst-address=127.0.0.0/8 type=blackhole
+add dst-address=169.254.0.0/16 type=blackhole
+add dst-address=172.16.0.0/12 type=blackhole
+add dst-address=192.0.0.0/24 type=blackhole
+add dst-address=192.0.2.0/24 type=blackhole
+add dst-address=192.168.0.0/16 type=blackhole
+add dst-address=198.18.0.0/15 type=blackhole
+add dst-address=198.51.100.0/24 type=blackhole
+add dst-address=203.0.113.0/24 type=blackhole
+
+/ip firewall address-list
+add list=BOGONS address=0.0.0.0/8
+add list=BOGONS address=10.0.0.0/8
+add list=BOGONS address=100.64.0.0/10
+add list=BOGONS address=127.0.0.0/8
+add list=BOGONS address=169.254.0.0/16
+add list=BOGONS address=172.16.0.0/12
+add list=BOGONS address=192.0.0.0/24
+add list=BOGONS address=192.0.2.0/24
+add list=BOGONS address=192.168.0.0/16
+add list=BOGONS address=198.18.0.0/15
+add list=BOGONS address=198.51.100.0/24
+add list=BOGONS address=203.0.113.0/24
+add list=DEFAULTONLY address=0.0.0.0/0
+add list=SW01 address=0.0.0.0/0
+add list=SW01 address=10.0.0.0/8
+add list=SW01 address=100.64.0.0/10
+add list=SW02 address=0.0.0.0/0
+add list=SW02 address=192.0.0.0/24
+add list=SW02 address=192.0.2.0/24
+add list=SW02 address=192.168.0.0/16
+
+/routing bgp instance
+add as=
+/routing/bgp/connection
+add name INETCUST update-source=62.216.228.65 remote-address=62.216.228.66 remote-as=65181 default-originate=always
+set INETCUST output.network=SW02
+### use-bfd=yes does not work mikrotik to Arista, arista sees but Mikrotik fails to work and drops BGP
+
+###
+# c1
+vrf definition public
+rd 65181:65001
+
+interface GigabitEthernet0/0
+ no switchport
+ vrf forwarding public
+ description BTNET1
+ ip address 61.216.0.2 255.255.255.252
+ negotiation auto
+!
+interface GigabitEthernet0/1
+ no switchport
+ vrf forwarding public
+ description BTNET2
+ ip address 61.216.0.6 255.255.255.252
+ negotiation auto
+
+interface Vlan997
+ vrf forwarding public
+ description NET2-BT
+ ip address 61.216.0.129 255.255.255.240
+interface Vlan998
+ vrf forwarding public
+ description NET1-BT
+ ip address 61.216.0.65 255.255.255.240
+
+ip prefix-list PL_BTNET1 seq 5 permit 61.216.0.64/28
+!
+ip prefix-list PL_BTNET2 seq 5 permit 61.216.0.128/28
+!
+ip prefix-list PL_DEFONLY seq 5 permit 0.0.0.0/0
+!
+!
+route-map RM_ROUTEADVERT deny 10
+ match ip address prefix-list PL_DEFONLY
+!
+route-map RM_ROUTEADVERT permit 65100
+ match ip address prefix-list PL_BTNET1
+ set as-path prepend last-as 1
+!
+route-map RM_ROUTEADVERT permit 65110
+ match ip address prefix-list PL_BTNET2
+ set metric 500
+!
+route-map RM_ROUTEADVERT deny 65500
+!
+route-map RM_ROUTEADVERT_BTNET2 deny 10
+ match ip address prefix-list PL_DEFONLY
+!
+route-map RM_ROUTEADVERT_BTNET2 permit 65100
+ match ip address prefix-list PL_BTNET1
+ set metric 500
+!
+route-map RM_ROUTEADVERT_BTNET2 permit 65110
+ match ip address prefix-list PL_BTNET2
+ set as-path prepend last-as 2
+!
+route-map RM_ROUTEADVERT_BTNET2 deny 65500
+!
+route-map RM_DEFPREFS permit 10
+ match ip address prefix-list PL_DEFONLY
+ set local-preference 90
+!
+route-map RM_DEFPREFS deny 65500
+!
+
+router bgp 65181
+ bgp router-id 61.216.0.65
+ bgp log-neighbor-changes
+ !
+ scope vrf public
+  neighbor 61.216.0.1 remote-as 2856
+  neighbor 61.216.0.5 remote-as 2856
+  neighbor 61.216.0.77 remote-as 65181
+  neighbor 61.216.0.141 remote-as 65181
+  !
+  address-family ipv4
+   network 61.216.0.64 mask 255.255.255.240
+   network 61.216.0.128 mask 255.255.255.240
+   neighbor 61.216.0.1 activate
+   neighbor 61.216.0.1 soft-reconfiguration inbound
+   neighbor 61.216.0.1 prefix-list PL_DEFONLY in
+   neighbor 61.216.0.1 route-map RM_ROUTEADVERT out
+   neighbor 61.216.0.5 activate
+   neighbor 61.216.0.5 soft-reconfiguration inbound
+   neighbor 61.216.0.5 prefix-list PL_DEFONLY in
+   neighbor 61.216.0.5 route-map RM_ROUTEADVERT_BTNET2 out
+   neighbor 61.216.0.77 activate
+   neighbor 61.216.0.77 soft-reconfiguration inbound
+   neighbor 61.216.0.141 activate
+   neighbor 61.216.0.141 soft-reconfiguration inbound
+   neighbor 61.216.0.141 route-map RM_DEFPREFS out
+  !
+
+
+
+
+
+
+ONT-SLHDIA Lab
+
+###
+# Mikrotik testrig
+/interface bridge port
+remove [ find interface=ether3 ]
+remove [ find interface=ether4 ]
+
+/ip address
+add address=62.216.228.69/30 comment=defconf interface=ether2 network=62.216.228.68
+add address=62.216.228.65/30 comment=defconf interface=ether1 network=62.216.228.64
+
+
+/ip route
+add dst-address=0.0.0.0/8 type=blackhole
+add dst-address=10.0.0.0/8 type=blackhole
+add dst-address=100.64.0.0/10 type=blackhole
+add dst-address=127.0.0.0/8 type=blackhole
+add dst-address=169.254.0.0/16 type=blackhole
+add dst-address=172.16.0.0/12 type=blackhole
+add dst-address=192.0.0.0/24 type=blackhole
+add dst-address=192.0.2.0/24 type=blackhole
+add dst-address=192.168.0.0/16 type=blackhole
+add dst-address=198.18.0.0/15 type=blackhole
+add dst-address=198.51.100.0/24 type=blackhole
+add dst-address=203.0.113.0/24 type=blackhole
+
+/ip firewall address-list
+add list=BOGONS address=0.0.0.0/8
+add list=BOGONS address=10.0.0.0/8
+add list=BOGONS address=100.64.0.0/10
+add list=BOGONS address=127.0.0.0/8
+add list=BOGONS address=169.254.0.0/16
+add list=BOGONS address=172.16.0.0/12
+add list=BOGONS address=192.0.0.0/24
+add list=BOGONS address=192.0.2.0/24
+add list=BOGONS address=192.168.0.0/16
+add list=BOGONS address=198.18.0.0/15
+add list=BOGONS address=198.51.100.0/24
+add list=BOGONS address=203.0.113.0/24
+add list=DEFAULTONLY address=0.0.0.0/0
+add list=SW01 address=0.0.0.0/0
+add list=SW01 address=10.0.0.0/8
+add list=SW01 address=100.64.0.0/10
+add list=SW02 address=0.0.0.0/0
+add list=SW02 address=192.0.0.0/24
+add list=SW02 address=192.0.2.0/24
+add list=SW02 address=192.168.0.0/16
+
+/routing bgp instance
+add as=
+/routing/bgp/connection
+add name INETCUST update-source=62.216.228.65 remote-address=62.216.228.66 remote-as=65181 default-originate=always
+set INETCUST output.network=SW02
+### use-bfd=yes does not work mikrotik to Arista, arista sees but Mikrotik fails to work and drops BGP
+
+
