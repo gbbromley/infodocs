@@ -21,3 +21,4 @@
       - ansible_distribution == "Ubuntu"
 
 
+ # Maybe look at https://www.linickx.com/ansible-cisco-primer-2-making-changes to do a delete of old crap?
