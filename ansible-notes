@@ -8,15 +8,16 @@
     when: ansible_distribution == "Ubuntu"
   - name: Upgrade all packages to the latest version
     apt: update_cache=yes upgrade=dist
-    when: packages.stderr != ""
-    when: ansible_distribution == "Ubuntu"
+    when:
+      - packages.stderr != ""
+      - ansible_distribution == "Ubuntu"
   - name: Check if a reboot is required
     register: file
     stat: path=/var/run/reboot-required get_md5=no
     when: ansible_distribution == "Ubuntu"
   - name: Reboot the server
     command: /sbin/reboot
-    when: file.stat.exists == true
-    when: ansible_distribution == "Ubuntu"
+      - file.stat.exists == true
+      - ansible_distribution == "Ubuntu"
 
 

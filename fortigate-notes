@@ -1,15 +1,10 @@
-Force Arista rebuild
 
-Delete the following files:
-enable
-delete flash:startup-config
-delete flash:zerotouch-config
-reload now
+Using VCI mapping to hand over ZTP files on a device basis
+
+VCI 221 - Arista;DCS-7010T-48;12.02;JPE17104573
+VCI 220 - Arista;DCS-7010T-48;12.03;JPE18485124
 
 
-
-ZTP
-- Setup DHCP option 67
 config system dhcp server
     edit 3
         set dns-service default
@@ -26,31 +21,34 @@ config system dhcp server
             edit 1
                 set code 67
                 set type string
-                set vci-match enable
-                set vci-string "Arista-2899.3a66.f45a-Ma1"
-                set value "tftp://192.168.1.49/ztp-bootstrap"
+                set value "tftp://192.168.1.49/ios-bootstrap"
             next
             edit 2
                 set code 67
                 set type string
                 set vci-match enable
-                set vci-string "Arista-985d.8286.c39f-Ma1"
+                set vci-string "Arista;DCS-7010T-48;12.03;JPE18485124"
+                set value "tftp://192.168.1.49/ztp-bootstrap"
+            next
+            edit 3
+                set code 67
+                set type string
+                set vci-match enable
+                set vci-string "Arista;DCS-7010T-48;12.02;JPE17104573"
                 set value "tftp://192.168.1.49/ztp-bootstrap"
             next
         end
         config reserved-address
-            edit 1
-                set ip 192.168.1.220
-                set mac 98:5d:82:86:c3:9f
-            next
             edit 2
+                set ip 192.168.1.220
+                set mac 98:5d:82:86:c3:9e
+            next
+            edit 3
                 set ip 192.168.1.221
-                set mac 28:99:3a:66:f4:5b
+                set mac 28:99:3a:66:f4:5a
             next
         end
     next
 end
-
-
 
 
