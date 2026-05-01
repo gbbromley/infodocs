@@ -1,0 +1,6 @@
+hostname ZTP-BOOTSTRAP
+username admin role super-admin secret PASSWORDHERE
+interface management1
+ip address dhcp
+dhcp client accept default-route
+end

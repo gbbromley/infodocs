@@ -1,0 +1,5 @@
+#!/usr/bin/Cli -p2
+copy tftp://192.168.1.49/ztp-startup-config flash:startup-config
+copy http://192.168.1.49/EOS-2.swi flash:EOS-2.swi
+config
+boot system flash:EOS-2.swi
