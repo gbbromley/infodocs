@@ -1,3 +1,48 @@
+###
+# Setup Mikrotik as a TFTP/PXE servers
+Setup DHCP
+To configure DHCP on the Mikrotik i created new DHCP server and dedicated DHCP network for it, which includes boot-file-name property:
+
+/ip dhcp-server
+add interface=MYLAN name=tftpsever
+ 
+/ip dhcp-server network
+add address=10.0.31.0/24 boot-file-name=gpxelinux.0 dns-server=10.0.31.1 \
+    gateway=10.0.31.1 netmask=24
+Also static lease for the server ethernet card MAC address been added:
+
+/ip dhcp-server lease
+add address=10.0.31.30 always-broadcast=yes mac-address=\
+      E4:1F:13:6C:12:34 server=tftpsever
+Also i would recommend to enable DHCP logging to monitor status of the requests.
+
+Upload files to router/device using FTP (admin/pass)
+
+Setup TFTP
+
+When DHCP configuration is completed, it is time to enable and configure TFTP on
+the router. In the RouterOS you have to specify parameters for every hosted file.
+
+Below is my configuration:
+
+/ip tftp
+add real-filename=gpxelinux.0 req-filename=gpxelinux.0
+add real-filename=chain.c32 req-filename=chain.c32
+add real-filename=pxelinux.cfg/default req-filename=\
+    pxelinux.cfg/default
+add real-filename=memdisk req-filename=memdisk
+add real-filename=menu.c32 req-filename=menu.c32
+add real-filename=reboot.c32 req-filename=reboot.c32
+add allow-rollover=yes real-filename=\
+    mfsbsd-11.0-RELEASE-amd64.img req-filename=mfsbsd-11.0-RELEASE-amd64.img
+
+
+
+
+
+
+
+
 iBGP Propogation Lab
 
 ###
