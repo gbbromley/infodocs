@@ -1,0 +1,17 @@
+
+
+# Needs a 'phone book' file to allow devices to match hostnames to the IP they got assigned called network-confg on the TFTP server
+# Each line is a mapping
+ip host DEVICE1 172.16.28.101
+ip host DEVICE2 172.16.28.102
+ip host DEVICE3 172.16.28.103
+ip host DEVICE4 172.16.28.104
+
+# Then each device has a bootstrap config call DEVICEx-confg
+!
+hostname DEVICEx
+username admin role super-admin secret PASSWORDHERE
+interface management1
+ip address dhcp
+dhcp client accept default-route
+end
