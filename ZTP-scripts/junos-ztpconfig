@@ -1,0 +1,10 @@
+# Uses a generic bootstrap file to get the device to a point it can be SSH'd to/Ansible accessible
+set system management-instance
+set system host-name ZTP-BOOTSTRAP
+set system login user netconf class super-user authentication plain-text-password-value PASSWORDHERE
+set system root-authentication plain-text-password-value PASSWORDHERE
+set system services netconf ssh
+set system services ssh root-login allow
+# em0/vme should already be DHCP and dont need changing
+#set interfaces em0 unit 0 family inet dhcp
+#set interfaces em0 unit 0 family inet dhcp
