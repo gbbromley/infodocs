@@ -1,6 +1,9 @@
 hostname ZTP-BOOTSTRAP
 username admin role super-admin secret PASSWORDHERE
-interface management1
+vrf instance MGMT
+description MGMT
+interface Management1
+vrf MGMT
 ip address dhcp
 dhcp client accept default-route
 end
